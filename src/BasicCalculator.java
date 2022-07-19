@@ -1,48 +1,51 @@
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-public class leetcode224 {
+public class BasicCalculator {
 
     public static void main(String[] args) {
 
-        String s = "-1+(-4+5+2)-3";
+        String s = "- (3 + (4 + 5))";
         int ans = calculate(s);
 
         System.out.println(ans);
-
     }
 
-    private static int calculate(String s) {
+    public static int calculate(String s) {
 
         Deque<Integer> operandStack = new ArrayDeque<>();
         Deque<Character> operatorStack = new ArrayDeque<>();
 
-        boolean negativeOp = false;
+        int sign = 1;
 
         s = s.trim();
 
+        int i = 0;
 
-        for(int i = 0; i < s.length(); i++){
+        while(i < s.length()){
 
             char ch = s.charAt(i);
 
-            if(i == 0 && ch == '-'){
-                if(s.charAt(1) == '('){
-                    negativeOp = true;
-                }else{
-                    operandStack.push(-(s.charAt(1) - '0'));
-                    i = 2;
-                }
-
-                continue;
-
-            }
-
             if(ch == ' '){
+                i++;
                 continue;
+
             }
 
-            if(ch == '('){
+            if(Character.isDigit(ch)){
+                int num = 0;
+                while(i < s.length() && Character.isDigit(s.charAt(i))) {
+                    int n = s.charAt(i) - '0';
+                    num = num * 10 + n;
+                    i++;
+                    // System.out.println(num + " ," + n);
+                }
+                i--;
+                // number = number * (ch - '0');
+                operandStack.push(num);
+            }
+
+            else if(ch == '('){
                 operatorStack.push(ch);
 
             }else if(ch == '+'){
@@ -60,7 +63,10 @@ public class leetcode224 {
                     operatorStack.push(ch);
                 }
 
+                sign = 1;
+
             }else if(ch == '-'){
+
                 if(operatorStack.isEmpty() ){
                     operatorStack.push(ch);
 
@@ -77,6 +83,9 @@ public class leetcode224 {
                     operandStack.push(performOperation(op1, op2, operatorStack.pop()));
                     operatorStack.push(ch);
                 }
+
+                sign = -1;
+
             }
             else if(ch == ')'){
 
@@ -87,30 +96,13 @@ public class leetcode224 {
                     operandStack.push(performOperation(op1, op2, operatorStack.pop()));
                 }
 
-                if(negativeOp){
-                    int num = operandStack.pop();
-                    operandStack.push(-num);
-                    negativeOp = false;
-                }
-
                 operatorStack.pop();
 
-            }else{
-//
-                int num = 0;
-                while(i < s.length() && Character.isDigit(s.charAt(i))) {
-                    int n = s.charAt(i) - '0';
-                    num = num * 10 + n;
-                    i++;
-                    // System.out.println(num + " ," + n);
-
-                }
-                i--;
-                operandStack.push(num);
             }
 
-            System.out.println(operandStack);
-            System.out.println(operatorStack);
+             System.out.println(operandStack);
+             System.out.println(operatorStack);
+            i++;
 
         }
 
@@ -120,13 +112,6 @@ public class leetcode224 {
             int op1 = operandStack.pop();
 
             operandStack.push(performOperation(op1, op2, operatorStack.pop()));
-        }
-
-        while(!operandStack.isEmpty()){
-            int op2 = operandStack.pop();
-            int op1 = operandStack.pop();
-
-            operandStack.push(performOperation(op1, op2, '+'));
         }
 
         return operandStack.peek();
